@@ -1,0 +1,25 @@
+@import '../../../style/index';
+
+.adyen-checkout-expand-button {
+    max-height: 38px;
+    display: flex;
+    gap: var(--adyen-checkout-spacer-060);
+    align-items: center;
+    flex-shrink: 0;
+    margin-right: var(--adyen-checkout-spacer-070);
+    max-width: 100%;
+
+    // reset button styles
+    border: none;
+    background: none;
+    cursor: pointer;
+    padding: 0;
+    color: var(--adyen-checkout-color-label-primary);
+    font-size: 1em;
+    font-weight: var(--adyen-checkout-text-body-stronger-font-weight);
+
+    [dir='rtl'] & {
+        margin-right: var(--adyen-checkout-spacer-000);
+        margin-left: var(--adyen-checkout-spacer-070);
+    }
+}

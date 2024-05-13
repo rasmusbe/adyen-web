@@ -1,20 +1,32 @@
 import { UIElementProps } from '../internal/UIElement/types';
+import { TxVariants } from '../tx-variants';
 
 export type UpiPaymentData = {
     paymentMethod: {
-        type: 'upi_qr' | 'upi_collect';
+        type: UpiSubTxVariant;
         virtualPaymentAddress?: string;
+        appId?: string;
     };
 };
 
-export type UpiMode = 'vpa' | 'qrCode';
+export enum UpiMode {
+    Vpa = 'vpa',
+    QrCode = 'qrCode',
+    Intent = 'intent'
+}
+
+export enum UpiSubTxVariant {
+    UpiCollect = TxVariants.upi_collect,
+    UpiQr = TxVariants.upi_qr,
+    UpiIntent = TxVariants.upi_intent
+}
+
+export type App = { id: string; name: string; type?: UpiSubTxVariant };
 
 export interface UPIConfiguration extends UIElementProps {
-    /**
-     * Define which view is displayed initially when the Component renders
-     * @defaultValue vpa
-     */
     defaultMode?: UpiMode;
+    // upi_intent
+    apps?: Array<App>;
     // Await
     paymentData?: string;
     // QR code

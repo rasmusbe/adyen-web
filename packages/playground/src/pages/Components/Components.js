@@ -106,7 +106,22 @@ getPaymentMethods({ amount, shopperLocale }).then(async paymentMethodsResponse =
     window.giropay = new Giropay(checkout).mount('.giropay-field');
     //
     // // UPI
-    window.upi = new UPI(checkout).mount('.upi-field');
+    window.upi = new UPI(checkout, {
+        apps: [
+            {
+                id: 'bhim',
+                name: 'BHIM'
+            },
+            {
+                id: 'gpay',
+                name: 'Google Pay'
+            },
+            {
+                id: 'phonepe',
+                name: 'Phone Pe'
+            }
+        ]
+    }).mount('.upi-field');
 
     // PIX
     window.pix = new Pix(checkout, { countdownTime: 5 }).mount('.pix-field');

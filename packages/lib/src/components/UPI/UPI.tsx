@@ -4,44 +4,74 @@ import UPIComponent from './components/UPIComponent';
 import { CoreProvider } from '../../core/Context/CoreProvider';
 import Await from '../internal/Await';
 import QRLoader from '../internal/QRLoader';
-import { UPIConfiguration, UpiMode, UpiPaymentData } from './types';
+import { UPIConfiguration, UpiMode, UpiPaymentData, UpiSubTxVariant } from './types';
 import SRPanelProvider from '../../core/Errors/SRPanelProvider';
 import { TxVariants } from '../tx-variants';
+import type { ICore } from '../../core/types';
+import isMobile from '../../utils/isMobile';
 
 class UPI extends UIElement<UPIConfiguration> {
     public static type = TxVariants.upi;
-    public static txVariants = [TxVariants.upi, TxVariants.upi_qr, TxVariants.upi_collect];
+    public static txVariants = [TxVariants.upi, TxVariants.upi_qr, TxVariants.upi_collect, TxVariants.upi_intent];
+    private selectedMode: UpiMode;
 
-    private useQrCodeVariant: boolean;
+    constructor(checkout: ICore, props: UPIConfiguration) {
+        super(checkout, props);
+        this.selectedMode = this.props.defaultMode;
+    }
 
-    protected static defaultProps = {
-        defaultMode: 'vpa'
-    };
+    formatProps(props: UPIConfiguration) {
+        if (!isMobile()) {
+            return {
+                ...super.formatProps(props),
+                defaultMode: props?.defaultMode ?? UpiMode.QrCode,
+                // For large screen, ignore the apps
+                apps: []
+            };
+        }
+
+        const hasIntentApps = props.apps?.length > 0;
+        const fallbackDefaultMode = hasIntentApps ? UpiMode.Intent : UpiMode.Vpa;
+        const allowedModes = [fallbackDefaultMode, UpiMode.QrCode];
+        const upiCollectApp = {
+            id: UpiMode.Vpa,
+            name: props.i18n.get('upi.collect.dropdown.label'),
+            type: UpiSubTxVariant.UpiCollect
+        };
+        const apps = hasIntentApps ? [...props.apps.map(app => ({ ...app, type: UpiSubTxVariant.UpiIntent })), upiCollectApp] : [];
+        return {
+            ...super.formatProps(props),
+            defaultMode: allowedModes.includes(props?.defaultMode) ? props.defaultMode : fallbackDefaultMode,
+            apps
+        };
+    }
 
     public get isValid(): boolean {
-        return this.useQrCodeVariant || !!this.state.isValid;
+        return this.state.isValid;
     }
 
     public formatData(): UpiPaymentData {
-        const { virtualPaymentAddress } = this.state.data;
+        if (this.selectedMode === UpiMode.QrCode) {
+            return {
+                paymentMethod: {
+                    type: UpiSubTxVariant.UpiQr
+                }
+            };
+        }
+
+        const { virtualPaymentAddress, app } = this.state.data;
+        const type = this.selectedMode === UpiMode.Vpa ? UpiSubTxVariant.UpiCollect : app?.type;
         return {
             paymentMethod: {
-                type: this.useQrCodeVariant ? TxVariants.upi_qr : TxVariants.upi_collect,
-                ...(virtualPaymentAddress && !this.useQrCodeVariant && { virtualPaymentAddress })
+                ...(type && { type }),
+                ...(type === UpiSubTxVariant.UpiCollect && virtualPaymentAddress && { virtualPaymentAddress }),
+                ...(type === UpiSubTxVariant.UpiIntent && app?.id && { appId: app.id })
             }
         };
     }
 
     private onUpdateMode = (mode: UpiMode): void => {
-        if (mode === 'qrCode') {
-            this.useQrCodeVariant = true;
-            /**
-             * When selecting QR code mode, we need to clear the state data and trigger the 'onChange'.
-             */
-            this.setState({ data: {}, valid: {}, errors: {}, isValid: true });
-        } else {
-            this.useQrCodeVariant = false;
-        }
+        this.selectedMode = mode;
     };
 
     private renderContent(type: string): h.JSX.Element {
@@ -90,6 +120,7 @@ class UPI extends UIElement<UPIConfiguration> {
                         payButton={this.payButton}
                         onChange={this.setState}
                         onUpdateMode={this.onUpdateMode}
+                        apps={this.props.apps}
                         defaultMode={this.props.defaultMode}
                         showPayButton={this.props.showPayButton}
                     />
