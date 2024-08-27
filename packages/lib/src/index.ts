@@ -15,3 +15,6 @@ async function AdyenCheckout(props: CoreOptions): Promise<Checkout> {
 }
 
 export default AdyenCheckout;
+
+// Utilities
+export { default as PayPalFastlaneSDK } from './components/PayPalFastlane/PayPalFastlaneSDK';

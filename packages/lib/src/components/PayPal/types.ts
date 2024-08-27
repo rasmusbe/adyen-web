@@ -4,13 +4,6 @@ import { UIElementProps } from '../types';
 import { SUPPORTED_LOCALES } from './config';
 import PaypalElement from './Paypal';
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-declare global {
-    interface Window {
-        paypal: object;
-    }
-}
-
 /**
  * The intent for the transaction. This determines whether the funds are captured immediately, or later.
  * @see {@link https://developer.paypal.com/docs/checkout/reference/customize-sdk/#intent}
