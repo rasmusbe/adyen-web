@@ -2,7 +2,7 @@ import { MetaConfiguration, PaymentMethodStoryProps, StoryConfiguration } from '
 import { getStoryContextCheckout } from '../../utils/get-story-context-checkout';
 import { UPIConfiguration } from '../../../src/components/UPI/types';
 import { Container } from '../Container';
-import { UPI } from '../../../src';
+import UPI from '../../../src/components/UPI';
 
 type UpiStory = StoryConfiguration<UPIConfiguration>;
 
