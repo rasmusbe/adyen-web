@@ -1,7 +1,6 @@
 import { MetaConfiguration, PaymentMethodStoryProps, StoryConfiguration } from '../types';
-import { getStoryContextCheckout } from '../../utils/get-story-context-checkout';
 import { CardConfiguration } from '../../../src/components/Card/types';
-import { Card } from '../../../src';
+import Card from '../../../src/components/Card';
 import { Container } from '../Container';
 import { searchFunctionExample } from '../../../../playground/src/utils';
 import { CardWith3DS2Redirect } from './cardStoryHelpers/CardWith3DS2Redirect';
@@ -12,12 +11,9 @@ const meta: MetaConfiguration<CardConfiguration> = {
     title: 'Cards/Card'
 };
 
-const createComponent = (args: PaymentMethodStoryProps<CardConfiguration>, context) => {
-    const { componentConfiguration } = args;
-    const checkout = getStoryContextCheckout(context);
-    const card = new Card(checkout, componentConfiguration);
-
-    return <Container element={card} />;
+const createComponent = (args: PaymentMethodStoryProps<CardConfiguration>) => {
+    const { componentConfiguration, ...checkoutConfig } = args;
+    return <Container Element={Card} checkoutConfig={checkoutConfig} componentConfig={componentConfiguration} />;
 };
 
 export const Default: CardStory = {
@@ -25,7 +21,7 @@ export const Default: CardStory = {
     args: {
         componentConfiguration: {
             _disableClickToPay: true,
-            autoFocus: true,
+            autoFocus: false,
             // brands: ['mc'],
             // brandsConfiguration: { visa: { icon: 'http://localhost:3000/nocard.svg', name: 'altVisa' } },
             challengeWindowSize: '02',
@@ -149,9 +145,7 @@ export const WithClickToPay: CardStory = {
 };
 
 export const CardWith_3DS2_Redirect: CardStory = {
-    render: args => {
-        return <CardWith3DS2Redirect contextArgs={args} />;
-    },
+    render: args => <CardWith3DS2Redirect {...args} />,
     args: {
         componentConfiguration: {
             _disableClickToPay: true
