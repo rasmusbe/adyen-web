@@ -2,7 +2,7 @@ import { resolveEnvironment } from '../../core/Environment';
 import requestFastlaneToken from './services/request-fastlane-token';
 import Script from '../../utils/Script';
 
-import type { Fastlane, AuthenticatedCustomerResult } from './types';
+import type { Fastlane, AuthenticatedCustomerResult, ShowShippingAddressSelectorResult } from './types';
 import type { FastlaneTokenData } from './services/request-fastlane-token';
 
 interface Configuration {
@@ -11,7 +11,12 @@ interface Configuration {
     environment?: 'test' | 'live' | 'live-us' | 'live-au' | 'live-apse' | 'live-in' | string;
 }
 
-class PayPalFastlaneSDK {
+async function PayPalFastlaneSDK(configuration: Configuration): Promise<FastlaneSDK> {
+    const fastlane = new FastlaneSDK(configuration);
+    return await fastlane.initialize();
+}
+
+class FastlaneSDK {
     private readonly clientKey: string;
     private readonly checkoutShopperURL: string;
     private readonly locale: string;
@@ -28,14 +33,25 @@ class PayPalFastlaneSDK {
         const tokenData = await this.requestClientToken();
         await this.fetchSdk(tokenData.value, tokenData.clientId);
         await this.initializeFastlane();
+        return this;
     }
 
-    public lookupCustomerByEmail(email: string): Promise<{ customerContextId: string }> {
-        return this.fastlaneSdk.identity.lookupCustomerByEmail(email);
+    public async authenticate(email: string): Promise<AuthenticatedCustomerResult> {
+        const { customerContextId } = await this.fastlaneSdk.identity.lookupCustomerByEmail(email);
+
+        if (customerContextId) {
+            return this.fastlaneSdk.identity.triggerAuthenticationFlow(customerContextId);
+        } else {
+            return {
+                authenticationState: 'not_found',
+                profileData: undefined
+            };
+        }
     }
 
-    public triggerAuthenticationFlow(customerContextId: string): Promise<AuthenticatedCustomerResult> {
-        return this.fastlaneSdk.identity.triggerAuthenticationFlow(customerContextId);
+    public showShippingAddressSelector(): Promise<ShowShippingAddressSelectorResult> {
+        if (!this.fastlaneSdk.profile) return null;
+        return this.fastlaneSdk.profile.showShippingAddressSelector();
     }
 
     public async mountWatermark(container: HTMLElement | string, options) {

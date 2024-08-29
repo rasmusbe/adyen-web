@@ -15,7 +15,7 @@ export interface Fastlane {
         triggerAuthenticationFlow: (customerContextId: string, options?: AuthenticationFlowOptions) => Promise<AuthenticatedCustomerResult>;
     };
     profile: {
-        showShippingAddressSelector: () => ShowShippingAddressSelectorResult;
+        showShippingAddressSelector: () => Promise<ShowShippingAddressSelectorResult>;
         showCardSelector: () => ShowCardSelectorResult;
     };
     setLocale: (locale: string) => void;
@@ -89,7 +89,7 @@ interface CardPaymentSource {
 /**
  * Profile method reference types
  */
-interface ShowShippingAddressSelectorResult {
+export interface ShowShippingAddressSelectorResult {
     selectionChanged: boolean;
     selectedAddress: Address;
 }
