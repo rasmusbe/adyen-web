@@ -178,19 +178,19 @@ getPaymentMethods({ amount, shopperLocale }).then(async paymentMethodsResponse =
     // }
 
     // PAYPAL
-    window.paypalButtons = checkout
-        .create('paypal', {
-            onShopperDetails: (shopperDetails, rawData, actions) => {
-                console.log('Shopper details', shopperDetails);
-                console.log('Raw data', rawData);
-                actions.resolve();
-            },
-            onError: (error, component) => {
-                component.setStatus('ready');
-                console.log('paypal onError', error);
-            }
-        })
-        .mount('.paypal-field');
+    // window.paypalButtons = checkout
+    //     .create('paypal', {
+    //         onShopperDetails: (shopperDetails, rawData, actions) => {
+    //             console.log('Shopper details', shopperDetails);
+    //             console.log('Raw data', rawData);
+    //             actions.resolve();
+    //         },
+    //         onError: (error, component) => {
+    //             component.setStatus('ready');
+    //             console.log('paypal onError', error);
+    //         }
+    //     })
+    //     .mount('.paypal-field');
 
     // // GOOGLE PAY
     // const googlepay = checkout.create('paywithgoogle', {
@@ -264,19 +264,17 @@ getPaymentMethods({ amount, shopperLocale }).then(async paymentMethodsResponse =
     //         console.warn(e);
     //     });
 
-    setTimeout(async () => {
-        console.time('Initialize');
-        const fastlane = await PayPalFastlaneSDK({
-            clientKey: process.env.__CLIENT_KEY__,
-            environment: process.env.__CLIENT_ENV__
-        });
-        console.timeEnd('Initialize');
+    console.time('Initialize');
+    const fastlane = await PayPalFastlaneSDK({
+        clientKey: process.env.__CLIENT_KEY__,
+        environment: process.env.__CLIENT_ENV__
+    });
+    console.timeEnd('Initialize');
 
-        const email = 'buy1_1287492020_per@adyen.com';
+    const email = 'buy1_1287492020_per@adyen.com';
 
-        console.time(`Lookup ${email}`);
-        const result = await fastlane.authenticate(email);
-        console.timeEnd(`Lookup ${email}`);
-        console.log(result);
-    }, 5000);
+    console.time(`Lookup ${email}`);
+    const result = await fastlane.authenticate(email);
+    console.timeEnd(`Lookup ${email}`);
+    console.log(result);
 });
